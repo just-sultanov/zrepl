@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+ZREPL_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+run() {
+  if command -v clojure > /dev/null 2>&1; then
+    exec clojure "$@"
+  else
+    exec mise exec -- clojure "$@"
+  fi
+}
+
+case "${1:-lsp}" in
+  lsp)
+    cd "$ZREPL_HOME"
+    run -M -m zrepl.main
+    ;;
+  *)
+    echo "usage: zrepl [lsp]" >&2
+    exit 2
+    ;;
+esac

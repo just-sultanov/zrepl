@@ -62,10 +62,12 @@
   (System/exit (if (shutdown-received?) 0 1)))
 
 (def ^:private notification-handlers
-  {"initialized"           (constantly nil)
-   "textDocument/didOpen"  (constantly nil)
-   "textDocument/didChange" (constantly nil)
-   "exit"                  exit})
+  {"initialized"                     (constantly nil)
+   "workspace/didChangeConfiguration" (constantly nil)
+   "textDocument/didOpen"            (constantly nil)
+   "textDocument/didChange"          (constantly nil)
+   "textDocument/didClose"           (constantly nil)
+   "exit"                            exit})
 
 ;;;; Entry
 
@@ -73,6 +75,7 @@
   "Runs the LSP loop on `in`/`out` and blocks until the stream closes. The
    JVM is exited with 0 after `shutdown`, 1 otherwise (also on stdin EOF)."
   [^java.io.InputStream in ^java.io.OutputStream out]
+  (log/info "zrepl listening on stdio")
   (let [ctx (rpc/start! in out
                         {:request-handlers request-handlers
                          :notification-handlers notification-handlers

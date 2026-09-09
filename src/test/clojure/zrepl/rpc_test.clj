@@ -207,7 +207,11 @@
 
   (testing "unknown notification is ignored"
     (let [ctx (test-ctx {:in (bytes->framed-stream (byte-array 0))})]
-      (is (nil? (sut/handle-message! ctx {:jsonrpc "2.0" :method "who/ami"}))))))
+      (is (nil? (sut/handle-message! ctx {:jsonrpc "2.0" :method "who/ami"})))))
+
+  (testing "unknown $/ notification is ignored too (LSP: must be ignored)"
+    (let [ctx (test-ctx {:in (bytes->framed-stream (byte-array 0))})]
+      (is (nil? (sut/handle-message! ctx {:jsonrpc "2.0" :method "$/setTrace" :params {:value "off"}}))))))
 
 (deftest dispatch-response-test
   (testing "client response is routed to the pending promise"

@@ -177,7 +177,11 @@
       (handler ctx params)
       (catch Exception e
         (log/error e "notification handler failed:" method)))
-    (log/warn "ignoring unknown notification:" method)))
+    ;; LSP: methods starting with $/ MUST be ignored if not understood —
+    ;; they are protocol-internal ($/setTrace, $/cancelRequest, ...).
+    (if (str/starts-with? method "$/")
+      (log/debug "ignoring $/ notification:" method)
+      (log/warn "ignoring unknown notification:" method))))
 
 (defn- handle-response!
   "Client's response to one of our server->client requests."

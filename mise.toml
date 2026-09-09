@@ -8,6 +8,8 @@ clojure = "latest"
 "github:clojure-lsp/clojure-lsp" = "latest"
 "github:weavejester/cljfmt" = "latest"
 java = "temurin-25"
+# Pin must match repos/zed/rust-toolchain.toml (see docs/ai/features/s03.md)
+rust = { version = "1.97.1", profile = "minimal", targets = ["wasm32-wasip2"] }
 
 
 [tasks."deps:check"]
@@ -17,6 +19,16 @@ run = "./bin/deps"
 [tasks."deps:upgrade"]
 description = "Upgrade outdated dependencies"
 run = "./bin/deps --upgrade --force"
+
+[tasks."zed:build"]
+description = "Build Zed from repos/zed (release, one-off ~30-60 min)"
+dir = "repos/zed"
+run = "cargo build --release -p zed"
+
+[tasks."zed:ext:check"]
+description = "Type-check the zed-extension for wasm32-wasip2"
+dir = "zed-extension"
+run = "cargo check --target wasm32-wasip2"
 
 [tasks.clean]
 description = "Run cleanup"

@@ -95,7 +95,11 @@
       (is (true? (sut/shutdown-received?))))))
 
 (deftest notifications-noop-test
-  (doseq [method ["initialized" "textDocument/didOpen" "textDocument/didChange"]]
+  (doseq [method ["initialized"
+                  "workspace/didChangeConfiguration"
+                  "textDocument/didOpen"
+                  "textDocument/didChange"
+                  "textDocument/didClose"]]
     (testing (str method " is a no-op and produces no output")
       (let [ctx (fresh-ctx)]
         (is (empty? (handle ctx {:jsonrpc "2.0" :method method :params {}})))))))

@@ -1,0 +1,13 @@
+[package]
+name = "zrepl_extension"
+version = "0.0.1"
+edition = "2024"
+license = "EPL-2.0"
+publish = false
+
+[lib]
+path = "src/zrepl_extension.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+zed_extension_api = { path = "../repos/zed/crates/extension_api" }

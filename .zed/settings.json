@@ -1,0 +1,10 @@
+{
+  "lsp": {
+    "zrepl": {
+      "binary": {
+        "path": "~/ws/projects/zrepl/bin/zrepl",
+        "arguments": ["lsp"]
+      }
+    }
+  }
+}

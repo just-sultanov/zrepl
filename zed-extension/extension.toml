@@ -1,0 +1,14 @@
+id = "zrepl"
+name = "zrepl"
+description = "Interactive REPL for Clojure: eval forms in Zed via nREPL"
+version = "0.0.1"
+schema_version = 1
+authors = ["Ilshat Sultanov <ilshat@sultanov.team>"]
+repository = "https://github.com/just-sultanov/zrepl"
+
+[lib]
+kind = "Rust"
+
+[language_servers.zrepl]
+name = "zrepl"
+languages = ["Clojure"]

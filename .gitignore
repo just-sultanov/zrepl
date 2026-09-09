@@ -17,3 +17,7 @@
 checkouts
 classes
 target
+repos/
+zed-extension/target
+zed-extension/.cargo
+zed-extension/*.wasm

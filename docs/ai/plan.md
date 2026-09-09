@@ -141,19 +141,21 @@ Bootstrap already exists (see Progress log); conventions live in
 zrepl/
   docs/ai/plan.md
   docs/ai/features/s02.md
+  docs/ai/features/s03.md
   agents.md             # toolchain + conventions (source of truth)
   deps.edn              # aliases: :develop :test :build :nop :outdated
-  mise.toml             # tasks → ./bin/*
-  bin/                  # clean lint test build install publish repl deps
+  mise.toml             # tasks → ./bin/*, rust toolchain for zed-extension
+  bin/                  # clean lint test build install publish repl deps zrepl
   build.clj             # tools.build; lib io.github.just-sultanov/zrepl
   tests.edn             # Kaocha; ^:unit focus-meta
-  src/main/clojure/zrepl/    # server source (main.clj server.clj handlers.clj
-                             #  commands.clj nrepl_client.clj forms.clj
-                             #  output.clj ipc.clj state.clj)
+  src/main/clojure/zrepl/    # server source (main.clj server.clj rpc.clj
+                             #  logging.clj lsp/schemas.clj)
   src/test/clojure/     # Kaocha tests
   src/develop/clojure/  # dev-only (nREPL, logging)
-  zed-extension/        # NOT CREATED YET: dev extension (Rust/WASM)
-  zed/                  # NOT CREATED YET: keymap.json, tasks.json, settings.json snippets
+  zed-extension/        # dev extension (Rust/WASM): extension.toml, Cargo.toml,
+                        #  src/zrepl_extension.rs
+  zed/                  # settings.json snippet (lsp.zrepl.binary.path);
+                        #  keymap.json, tasks.json land in S0.8
   repos/                # vendored refs (zed, nrepl, clojure-lsp) — not part of the lib
 ```
 
@@ -174,7 +176,10 @@ zrepl/
 - [ ] **S0.3 Zed registration**: minimal dev extension
       (`zed-extension/`, ~30 lines Rust) registering `zrepl` for Clojure;
       install as dev extension; binary path via `settings.json`; verify
-      server starts alongside clojure-lsp.
+      server starts alongside clojure-lsp. Revised 2026-09-10: see
+      `docs/ai/features/s03.md` (no language/grammar duplication; launch via
+      `lsp.zrepl.binary.path` → `bin/zrepl`; path-dep on vendored
+      `zed_extension_api` 0.8.0; rust 1.97.1 + wasm32-wasip2 via mise).
 - [ ] **S0.4 Buffer tracking**: `didOpen`/`didChange` keep buffer text in
       an atom; all other notifications no-op.
 - [ ] **S0.5 nREPL eval**: read `.nrepl-port`, connect, clone one session,
@@ -307,3 +312,28 @@ zrepl/
   (moved from :develop to :deps), babashka/process 0.6.25 (:test). Dummy
   `zrepl.core` removed. `mise run lint` + `mise run test` green.
 - Next session: start at **S0.3** (Zed registration — dev extension).
+- 2026-09-10 (S0.3 prep): feature doc `docs/ai/features/s03.md` written and
+  implemented (Zed itself not yet built/run — manual checklist pending).
+  Created `zed-extension/` (`extension.toml`, `Cargo.toml` with path-dep on
+  `repos/zed/crates/extension_api` 0.8.0, `src/zrepl_extension.rs` reading
+  `LspSettings::for_worktree`), `bin/zrepl` launcher (`zrepl lsp` →
+  `clojure -M -m zrepl.main`, mise fallback), `zed/settings.json` snippet.
+  mise.toml: rust 1.97.1 (matches `repos/zed/rust-toolchain.toml`) +
+  wasm32-wasip2, tasks `zed:build` / `zed:ext:check`. Decisions: no
+  language/grammar duplication (official clojure extension owns Clojure);
+  launch via `lsp.zrepl.binary.path` (bypasses the extension hook entirely,
+  `lsp_store.rs:725`); project root from `rootUri` deferred to S0.5.
+- 2026-09-10 (S0.3 verified live): Zed (built from repos/zed) + dev
+  extension install succeeded; opening a `.clj` buffer sends
+  `textDocument/didOpen` with `languageId: "clojure"` to zrepl — second
+  server alongside clojure-lsp confirmed. First real traffic surfaced two
+  expected notifications we did not handle: `workspace/didChangeConfiguration`
+  (Zed sends after initialize) and `textDocument/didClose`. Added both as
+  no-ops in `zrepl.server`; `$/`-prefixed unknown notifications now log at
+  debug per LSP (must be silently ignored), other unknowns stay at warn.
+  Tests: 19 green, `notifications-noop-test` extended, `$/`-ignore covered in
+  `rpc_test`. Remaining S0.3 checklist: `zrepl/eval` from the command picker,
+  clojure-lsp coexistence (completions/diagnostics) — verify in Zed.
+  Post-fix run: clean after no-op handlers (empty log is the expected quiet
+  success); added a startup `zrepl listening on stdio` INFO line in
+  `zrepl.server/serve!` so the server lifecycle is visible in Zed's LSP logs.

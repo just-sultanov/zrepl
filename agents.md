@@ -4,7 +4,8 @@
 
 - **deps.edn** — no Leiningen, no `project.clj`. All tooling via `clojure` CLI + `mise`.
 - **mise** — version manager and task runner. Install tools with `mise install`.
-- Managed tools: `clojure`, `clj-kondo`, `clojure-lsp`, `cljfmt`.
+- Managed tools: `clojure`, `clj-kondo`, `clojure-lsp`, `cljfmt`, `rust`
+  (1.97.1 + wasm32-wasip2 — pin must match `repos/zed/rust-toolchain.toml`).
 
 ## Source Layout
 
@@ -31,6 +32,8 @@ All via `mise run <task>`:
 | `mise run repl`         | Start nREPL with Cider middleware                |
 | `mise run deps:check`   | Check outdated deps (antq)                       |
 | `mise run deps:upgrade` | Upgrade outdated deps                            |
+| `mise run zed:build`    | Build Zed from `repos/zed` (release, one-off)    |
+| `mise run zed:ext:check`| Type-check `zed-extension/` for wasm32-wasip2    |
 
 ## CI Order
 
