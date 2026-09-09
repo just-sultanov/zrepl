@@ -1,0 +1,50 @@
+[env]
+_.path = [{ path = "./bin", tools = true }]
+
+
+[tools]
+clojure = "latest"
+"github:clj-kondo/clj-kondo" = "latest"
+"github:clojure-lsp/clojure-lsp" = "latest"
+"github:weavejester/cljfmt" = "latest"
+
+
+[tasks."deps:check"]
+description = "Check for outdated dependencies"
+run = "./bin/deps"
+
+[tasks."deps:upgrade"]
+description = "Upgrade outdated dependencies"
+run = "./bin/deps --upgrade --force"
+
+[tasks.clean]
+description = "Run cleanup"
+run = "./bin/clean"
+
+[tasks.lint]
+description = "Run linters"
+run = "./bin/lint"
+
+[tasks.repl]
+description = "Run nREPL"
+depends = ["clean"]
+run = "./bin/repl"
+
+[tasks.test]
+description = "Run tests"
+run = "./bin/test"
+
+[tasks.build]
+description = "Build jar"
+depends = ["clean"]
+run = "./bin/build"
+
+[tasks.install]
+description = "Build and install jar locally"
+depends = ["build"]
+run = "./bin/install"
+
+[tasks.publish]
+description = "Publish to clojars"
+depends = ["build"]
+run = "./bin/publish"

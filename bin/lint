@@ -1,0 +1,4 @@
+#!/bin/bash
+
+clojure-lsp diagnostics
+clojure-lsp format
