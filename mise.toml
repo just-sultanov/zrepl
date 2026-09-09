@@ -7,6 +7,7 @@ clojure = "latest"
 "github:clj-kondo/clj-kondo" = "latest"
 "github:clojure-lsp/clojure-lsp" = "latest"
 "github:weavejester/cljfmt" = "latest"
+java = "temurin-25"
 
 
 [tasks."deps:check"]

@@ -283,5 +283,27 @@ zrepl/
 - 2026-09-09 (bootstrap): S0.1 done by hand — git repo, deps.edn, mise +
   bin/, build.clj, tests.edn, `zrepl.*` namespaces, agents.md. Uncommitted
   at session end.
-- Next session: start at **S0.2** (LSP skeleton — own JSON-RPC, see
-  `docs/ai/features/s02.md`). Working directory will be renamed to `…/zrepl`.
+- 2026-09-10 (S0.2): LSP skeleton implemented per `docs/ai/features/s02.md`
+  — own JSON-RPC 2.0 over stdio (no lsp4clj). Namespaces: `zrepl.logging`
+  (programmatic logback → stderr), `zrepl.rpc` (LSP framing on
+  `readNBytes`, classification, FIFO single-virtual-thread processing —
+  message order preserved so `exit` cannot overtake earlier requests;
+  write-locked output; server→client requests return promises for client
+  responses; stdout guard `discard-stdout!` replaces `System/out` AND the
+  root of `*out*` — a bare setOut does not catch Clojure `println`),
+  `zrepl.lsp.schemas` (malli, no `:fn`), `zrepl.server` (initialize
+  capabilities: executeCommandProvider ["zrepl/eval"], inlayHintProvider,
+  full sync; didOpen/didChange no-op; `zrepl/eval` stub; inlayHint → [];
+  shutdown/exit codes per LSP), `zrepl.main` (entry: capture real stdout
+  BEFORE guarding). After `initialize` the server sends
+  `workspace/inlayHint/refresh` and ignores the response — bidirectional
+  channel verified. Tests (19, all `^:unit`): framing roundtrip/malformed/
+  fragmented/EOF, classification, dispatch (request/notification/response,
+  -32601/-32602/-32603), sync-executor dispatch tests, guard test (raw
+  thread reads root `*out*` — futures convey bindings), integration via
+  `babashka.process` subprocess: full cycle initialize → initialized →
+  eval → inlayHint → didOpen → shutdown → exit, exit code 0. deps: malli
+  0.20.1, jsonista 1.0.1, tools.logging 1.3.1, logback-classic 1.6.3
+  (moved from :develop to :deps), babashka/process 0.6.25 (:test). Dummy
+  `zrepl.core` removed. `mise run lint` + `mise run test` green.
+- Next session: start at **S0.3** (Zed registration — dev extension).
