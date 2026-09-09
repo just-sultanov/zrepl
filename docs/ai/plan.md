@@ -2,6 +2,9 @@
 
 > Project renamed from `nrepl-lsp` → `zrepl`. Lib coord:
 > `io.github.just-sultanov/zrepl`. All command names use the `zrepl/` prefix.
+>
+> Note: S0.2 was revised in `docs/ai/features/s02.md` (own JSON-RPC over stdio instead of
+> lsp4clj; malli + jsonista + tools.logging/logback).
 
 ## Goal
 
@@ -136,7 +139,8 @@ Bootstrap already exists (see Progress log); conventions live in
 
 ```
 zrepl/
-  plan.md
+  docs/ai/plan.md
+  docs/ai/features/s02.md
   agents.md             # toolchain + conventions (source of truth)
   deps.edn              # aliases: :develop :test :build :nop :outdated
   mise.toml             # tasks → ./bin/*
@@ -159,9 +163,11 @@ zrepl/
       (aliases develop/test/build/nop/outdated), mise.toml + bin/ tasks,
       build.clj (`io.github.just-sultanov/zrepl`), tests.edn (Kaocha),
       `zrepl.core` + dummy `^:unit` test, agents.md, readme.md. Do NOT
-      redo. Remaining for S0.2: add `lsp4clj 2.0.1` (+ babashka/cli,
-      timbre) to `:deps`.
-- [ ] **S0.2 LSP skeleton**: lsp4clj over stdio; `initialize` (capabilities:
+      redo. S0.2 was re-scoped on 2026-09-10: no lsp4clj — own JSON-RPC
+      over stdio, malli + jsonista, tools.logging + logback (stderr);
+      details in `docs/ai/features/s02.md`.
+- [ ] **S0.2 LSP skeleton**: own JSON-RPC over stdio (revised 2026-09-10,
+      see `docs/ai/features/s02.md`); `initialize` (capabilities:
       `executeCommandProvider: ["zrepl/eval"]`, `inlayHintProvider`),
       `shutdown`/`exit`; verify with a scripted JSON-RPC stdio client.
       Server namespaces under `src/main/clojure/zrepl/`.
@@ -277,5 +283,5 @@ zrepl/
 - 2026-09-09 (bootstrap): S0.1 done by hand — git repo, deps.edn, mise +
   bin/, build.clj, tests.edn, `zrepl.*` namespaces, agents.md. Uncommitted
   at session end.
-- Next session: start at **S0.2** (add lsp4clj to deps, LSP skeleton).
-  Working directory will be renamed to `…/zrepl`.
+- Next session: start at **S0.2** (LSP skeleton — own JSON-RPC, see
+  `docs/ai/features/s02.md`). Working directory will be renamed to `…/zrepl`.

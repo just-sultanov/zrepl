@@ -10,7 +10,8 @@ diagnostics. The same commands are available programmatically through
 `workspace/executeCommand` and a small CLI, so LLM agents can drive the
 REPL without knowing the nREPL wire protocol.
 
-Status: experiment — design and milestones live in `plan.md`.
+Status: experiment — design and milestones live in
+`docs/ai/plan.md` (feature plans in `docs/ai/features/`).
 
 ## Installation
 
