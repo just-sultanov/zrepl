@@ -173,14 +173,14 @@ zrepl/
       `executeCommandProvider: ["zrepl/eval"]`, `inlayHintProvider`),
       `shutdown`/`exit`; verify with a scripted JSON-RPC stdio client.
       Server namespaces under `src/main/clojure/zrepl/`.
-- [ ] **S0.3 Zed registration**: minimal dev extension
+- [x] **S0.3 Zed registration**: minimal dev extension
       (`zed-extension/`, ~30 lines Rust) registering `zrepl` for Clojure;
       install as dev extension; binary path via `settings.json`; verify
       server starts alongside clojure-lsp. Revised 2026-09-10: see
       `docs/ai/features/s03.md` (no language/grammar duplication; launch via
       `lsp.zrepl.binary.path` → `bin/zrepl`; path-dep on vendored
       `zed_extension_api` 0.8.0; rust 1.97.1 + wasm32-wasip2 via mise).
-- [ ] **S0.4 Buffer tracking**: `didOpen`/`didChange` keep buffer text in
+- [x] **S0.4 Buffer tracking**: `didOpen`/`didChange` keep buffer text in
       an atom; all other notifications no-op.
 - [ ] **S0.5 nREPL eval**: read `.nrepl-port`, connect, clone one session,
       eval code from command args (plain string first), reduce responses to
@@ -337,3 +337,32 @@ zrepl/
   Post-fix run: clean after no-op handlers (empty log is the expected quiet
   success); added a startup `zrepl listening on stdio` INFO line in
   `zrepl.server/serve!` so the server lifecycle is visible in Zed's LSP logs.
+- 2026-09-10 (S0.4 done): buffer tracking implemented per
+  `docs/ai/features/s04.md`. State atom extended to
+  `{:shutdown-received? false :buffers {}}`; handlers `did-open` (wholesale
+  `assoc-in`), `did-change` (last `contentChanges` event; unknown uri →
+  debug log, empty batch → entry untouched; no phantom buffers),
+  `did-close` (`dissoc`), `did-save` registered as no-op. Public accessors
+  `zrepl.server/buffers` / `buffer` for S0.5 + introspection; atom private.
+  Schemas: `DidCloseTextDocumentParams` added and registered
+  (`didSave` intentionally unregistered — full sync carries no text).
+  S0.3 leftover: `executeCommand <command> (<n> args)` INFO log in
+  `execute-command`. Tests: `buffer-tracking-test` (open/change/multi-event/
+  empty-batch/unknown-uri/re-open/close + schema validation),
+  `did-save-noop-test`; `notifications-noop-test` slimmed to the real no-ops
+  (didSave added, didOpen/didChange/didClose removed — they now mutate state).
+  21 tests, 89 assertions green; lint clean. Remaining acceptance: live Zed
+  run (open/edit/close `.clj` → no WARNs, server alive).
+- 2026-09-10 (S0.3 + S0.4 verified live): `executeCommand zrepl/eval (0 args)`
+  visible in Zed's LSP **Server Logs** tab (stderr feeds the log store; stderr
+  never appears in the RPC Messages tab — by Zed's design,
+  `lsp_store/log_store.rs:960`). Open/edit/close of a `.clj` buffer stays
+  silent (zero WARNs), server alive — S0.4 acceptance fully closed; the
+  S0.3 executeCommand-log leftover confirmed, and clojure-lsp coexistence
+  (completions/diagnostics) works alongside zrepl → S0.3 checklist complete.
+  Added an INFO line on `initialize` in `zrepl.server` — the startup line
+  can race Zed's stderr-reader registration, `initialize` cannot.
+  Note for **S0.5**: Zed's command picker invokes provider commands with
+  **0 arguments** (observed live) — eval code must come from S0.8 task args
+  (`$ZED_SELECTED_TEXT` / cursor position) or from the tracked buffer in the
+  S0.4 atom; integration tests keep passing explicit arguments.

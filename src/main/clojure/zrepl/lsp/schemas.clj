@@ -66,6 +66,10 @@
    [:textDocument VersionedTextDocumentIdentifier]
    [:contentChanges [:sequential TextDocumentChangeEvent]]])
 
+(def DidCloseTextDocumentParams
+  [:map
+   [:textDocument TextDocumentIdentifier]])
+
 (def ExecuteCommandParams
   [:map
    [:command :string]
@@ -99,6 +103,7 @@
    "initialized"                     {:params InitializedParams}
    "textDocument/didOpen"            {:params DidOpenTextDocumentParams}
    "textDocument/didChange"          {:params DidChangeTextDocumentParams}
+   "textDocument/didClose"           {:params DidCloseTextDocumentParams}
    "textDocument/inlayHint"          {:params InlayHintParams
                                       :result [:sequential InlayHint]}
    "workspace/executeCommand"        {:params ExecuteCommandParams}
