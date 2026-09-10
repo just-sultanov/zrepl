@@ -43,6 +43,7 @@
   ([] (init! nil))
   ([{:keys [level pattern] :or {level :info pattern default-pattern}}]
    (let [pattern (if (string? pattern) pattern (name pattern))
+         level-name ^String (str/upper-case (name level))
          context ^ch.qos.logback.classic.LoggerContext (LoggerFactory/getILoggerFactory)
          root (.getLogger context Logger/ROOT_LOGGER_NAME)]
      (when (str/blank? pattern)
@@ -50,4 +51,7 @@
      (doto root
        (.detachAndStopAllAppenders)
        (.addAppender (stderr-appender pattern))
-       (.setLevel (Level/toLevel (str/upper-case (name level)) Level/INFO))))))
+       ;; dot-form + hinted binding: cloverage turns slash-interop call heads
+       ;; into method values (compiled reflectively regardless of hints) and
+       ;; loses tags of computed args — a hinted let binding survives both
+       (.setLevel (. Level toLevel level-name Level/INFO))))))

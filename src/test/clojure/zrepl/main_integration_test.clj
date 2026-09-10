@@ -58,7 +58,7 @@
                            (neg? r) (throw (ex-info "EOF while reading message body" {}))
                            (= content-length (+ off r)) (+ off r)
                            :else (recur (+ off r)))))]
-            (jsonista/read-value (String. chars 0 read) json-mapper))))
+            (jsonista/read-value (String. chars 0 (int read)) json-mapper))))
       nil)))
 
 (defn- next-response-for
@@ -80,14 +80,14 @@
 
 (defn- stdin-writer
   [proc]
-  (let [writer (BufferedWriter. (OutputStreamWriter. (:in proc) "UTF-8"))]
+  (let [writer (BufferedWriter. (OutputStreamWriter. ^java.io.OutputStream (:in proc) "UTF-8"))]
     (fn send! [^String s]
       (.write writer s)
       (.flush writer))))
 
 (defn- stdout-reader
   [proc]
-  (BufferedReader. (InputStreamReader. (:out proc) "UTF-8")))
+  (BufferedReader. (InputStreamReader. ^java.io.InputStream (:out proc) "UTF-8")))
 
 (deftest ^:integration full-lsp-cycle-test
   (testing "scripted client completes initialize -> initialized -> eval -> shutdown -> exit"
@@ -96,7 +96,7 @@
           rdr (stdout-reader proc)
           inbox (volatile! [])
           watchdog (future
-                     (Thread/sleep watchdog-ms)
+                     (Thread/sleep (long watchdog-ms))
                      (when (p/alive? proc)
                        (p/destroy proc)))]
       (try

@@ -39,9 +39,9 @@
 (defn frame-bytes
   "Returns the LSP-framed bytes (headers + body) for `msg`."
   [msg]
-  (let [body (jsonista/write-value-as-bytes msg)
-        header (.getBytes (format "Content-Length: %d\r\n\r\n" (alength body))
-                          StandardCharsets/UTF_8)
+  (let [body ^bytes (jsonista/write-value-as-bytes msg)
+        header-str ^String (format "Content-Length: %d\r\n\r\n" (alength body))
+        header (.getBytes header-str StandardCharsets/UTF_8)
         out (ByteArrayOutputStream. (+ (alength header) (alength body)))]
     (.write out header)
     (.write out body)
@@ -275,9 +275,9 @@
              :after-response (or after-response {})
              :state state
              :on-close on-close}
-        reader-thread (-> (Thread/ofVirtual)
-                          (.name "zrepl-rpc-reader")
-                          (.unstarted (fn [] (reader-loop! ctx))))]
+        builder ^java.lang.Thread$Builder (Thread/ofVirtual)
+        reader-thread ^Thread (-> (.name builder "zrepl-rpc-reader")
+                                  (.unstarted (fn [] (reader-loop! ctx))))]
     (.start reader-thread)
     (assoc ctx :reader-thread reader-thread)))
 

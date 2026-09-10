@@ -21,12 +21,19 @@
 
   :tests [{:id :unit
            :source-paths ["src/main/clojure"]
-           :test-paths ["src/test/clojure"]
-           :focus-meta [:unit]}]
+           :test-paths ["src/test/clojure"]}]
+
+  ;; subset runs stay available: `mise run test --focus <name>` or
+  ;; `--focus-meta <meta>`; deftests are intentionally untagged so every
+  ;; run executes the whole suite (incl. the ^:integration cycle test)
 
   :cloverage/opts {:output "target/coverage"
                    :ns-regex []
                    :ns-exclude-regex []
+                   ;; `locking` expands to monitor-enter/monitor-exit, which
+                   ;; cloverage 1.2.4 cannot instrument (WARNs "Unknown
+                   ;; special form") — exclude its call sites
+                   :exclude-call [clojure.core/locking]
                    :fail-threshold 0
                    :low-watermark 50
                    :high-watermark 80
